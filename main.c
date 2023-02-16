@@ -1,28 +1,93 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "pacman.h"
+#include "mapa.h"
 
-/* run this program using the console pauser or add your own getch, system("pause") or input loop */
+MAPA m;
+POSICAO heroi;
 
-int main(int argc, char *argv[]) {
-	//Declarando uma matriz
-	char mapa[5][10+1];
+/*para um ponteiro de ponteiros(matriz) usamos dois **
+char** mapa;
+int linhas;
+int colunas;
+*/
+
+
+
+int acabou(){
+	return 0;
+}
+
+int ehdirecao(char direcao) {
+	return
+		direcao == ESQUERDA || 
+		direcao == CIMA ||
+		direcao == BAIXO ||
+		direcao == DIREITA;
+}
+
+void move(char direcao){
 	
-	FILE* f;
-	f = fopen("mapa.txt", "r");
-	if(f==0){
-		printf("Erro na leitura do mapa");
-		exit(1);
+	if(!ehdirecao(direcao)){
+		return;
 	}
+	/* Após isso, é preciso tirar o pacman antigo do mapa
+	m.matriz[heroi.x][heroi.y] = '.';
+	Agora faremos um switch case para cada hipotese de movimento seguindo a logica wasd
+	*/
 	
-	//Aqui, percorremos uma matriz usando apenas o i, sem o j. Para isso, colocamos apenas a primeira pos
-	for(int i=0; i<5;i++){
-		fscanf(f,"%s", mapa[i]);
+	int proximox= heroi.x;
+	int proximoy= heroi.y;
+	
+	switch(direcao){
+		case ESQUERDA:
+			//Caso aperte A, vai para a esquerda
+			proximoy--;
+			break;
+		case CIMA:
+			proximox--;
+			break;
+		case BAIXO:
+			proximox++;
+			break;
+		case DIREITA:
+			proximoy++;
+			break;
 	}
-	
-	for(int i=0; i<5;i++){
-		printf("%s \n",mapa[i]);
+	if(!ehvalida(&m, proximox, proximoy)){
+		return;
 	}
+		
+
+	if(!ehvazia(&m, proximox, proximoy))
+		return;
 	
-	fclose(f);
+	andanomapa(&m, heroi.x, heroi.y, proximox, proximoy);
+	
+
+	heroi.x = proximox;
+	heroi.y = proximoy;
+
 	
 }
+
+int main(int argc, char *argv[]) {
+	
+	lemapa(&m);
+	encontramapa(&m, &heroi, HEROI);
+	
+	
+	do{
+		imprimemapa(&m);
+		
+		char comando;
+		scanf(" %c", &comando);
+		move(comando);
+		
+	} while(!acabou());
+
+
+	liberamapa(&m);
+}
+
+
